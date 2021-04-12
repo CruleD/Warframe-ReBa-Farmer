@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Warframe_ReBa_Farmer
@@ -807,9 +808,9 @@ namespace Warframe_ReBa_Farmer
                 TempWebClient.Encoding = Encoding.UTF8;
                 WarframeWorldState_JSON = TempWebClient.DownloadString("http://content.warframe.com/dynamic/worldState.php");
             }
-            WarframeWorldState_JSON = WarframeWorldState_JSON.Remove(0, WarframeWorldState_JSON.IndexOf("VoidTraders") + ("VoidTraders").Length + 3);
-            WarframeWorldState_JSON = WarframeWorldState_JSON.Substring(0, WarframeWorldState_JSON.IndexOf("PrimeAccessAvailability") - 3);//Substring(0, WarframeWorldState_JSON.IndexOf("]"));
-            JObject BaroJObject = JObject.Parse(WarframeWorldState_JSON);
+            WarframeWorldState_JSON = WarframeWorldState_JSON.Remove(0, WarframeWorldState_JSON.IndexOf("VoidTraders") + ("VoidTraders").Length + 2);
+            WarframeWorldState_JSON = WarframeWorldState_JSON.Substring(0, WarframeWorldState_JSON.IndexOf("VoidStorms") - 2); //Substring(0, WarframeWorldState_JSON.IndexOf("]"));
+            JToken BaroJObject = JArray.Parse(WarframeWorldState_JSON).FirstOrDefault();
             BaroStartsAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(BaroJObject["Activation"]["$date"]["$numberLong"].Value<Int64>());
         }
 
@@ -905,6 +906,7 @@ namespace Warframe_ReBa_Farmer
                 PrimeItemsData[PrimeItem].Market_Count = PlatList.Count().ToString();
                 ProgressCounter += 1;
                 Form_Main._FormReference.BeginInvoke(new Action(() => { Form_Main._FormReference.PrimeData_DL_btn.Text = (ProgressCounter / PrimeItemsData.Count).ToString("P"); }));
+                Thread.Sleep(100);
             }
 
             string SerializeAndWrite = JsonConvert.SerializeObject(PrimeItemsData);
